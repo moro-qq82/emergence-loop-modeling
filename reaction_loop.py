@@ -3,6 +3,7 @@ import numpy as np
 from scipy.spatial.distance import pdist, squareform
 from collections import defaultdict
 from molecule import Molecule  # Moleculeクラスをインポート
+from utils import *
 
 class ReactionLoop3D:
     def __init__(self, 
@@ -81,7 +82,7 @@ class ReactionLoop3D:
         # 拡散
         for molecule in self.molecules:
             molecule.diffuse(dt, self.membrane_bounds)
-            molecule.position = self._apply_periodic_boundary(molecule.position)
+            molecule.position = apply_periodic_boundary(molecule.position, self.box_size)
 
         # 反応
         new_molecules = []
@@ -96,14 +97,14 @@ class ReactionLoop3D:
                     continue
 
                 distance = np.linalg.norm(
-                    self._minimum_image_distance(mol1.position, mol2.position)
+                    minimum_image_distance(mol1.position, mol2.position, self.box_size)
                 )
 
                 if distance < 1.0:  # 反応半径
-                    reaction = self._check_reaction(mol1, mol2)
+                    reaction = check_reaction(mol1, mol2, self.reaction_constants)
                     if reaction and np.random.random() < reaction['rate'] * dt:
                         new_pos = (mol1.position + mol2.position) / 2
-                        new_pos = self._apply_periodic_boundary(new_pos)
+                        new_pos = apply_periodic_boundary(new_pos, self.box_size)
 
                         # 組み合わせた履歴を持つ新しい分子を作成
                         new_mol = Molecule(new_pos, reaction['product'], 0.1)

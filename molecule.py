@@ -60,6 +60,7 @@ class Molecule:
             return
 
         # 任意のサイズのループをチェック
+        # 今は生成物を追って行って同じものが出たらループとしている（本当は別の化学種でもよいはずだが未実装：TODO
         current_species = sequence[-1]
         for i, species in enumerate(sequence[:-1]):
             if species == current_species:
