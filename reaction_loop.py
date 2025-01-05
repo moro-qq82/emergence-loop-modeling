@@ -8,14 +8,14 @@ from utils import *
 class ReactionLoop3D:
     def __init__(self, 
                  box_size: float, 
-                 membrane_bounds: Union[Tuple[float, float], None] = None, 
+                 membrane_bounds: Union[Tuple[float, float, float, float], None] = None, 
                  initial_molecules: Union[Dict, None] = None) -> None:
         """
         膜を伴う3D反応ループシミュレーションを初期化
 
         Args:
             box_size (float): 立方体シミュレーションボックスのサイズ
-            membrane_bounds (tuple): 膜境界のオプション (min_z, max_z)
+            membrane_bounds (tuple): 球状膜の中心と半径 (center_x, center_y, center_z, radius)
             initial_molecules (dict): 初期分子構成
         """
         self.box_size = box_size
@@ -57,12 +57,17 @@ class ReactionLoop3D:
             for _ in range(config['count']):
                 # Aタイプの分子については、指定されている場合は膜の境界内で初期化
                 if self.membrane_bounds and species.startswith('A'):
-                    min_z, max_z = self.membrane_bounds
-                    position = np.array([
-                        np.random.uniform(0, self.box_size),
-                        np.random.uniform(0, self.box_size),
-                        np.random.uniform(min_z, max_z)
-                    ])
+                    center_x, center_y, center_z, radius = self.membrane_bounds
+                    # 球状膜の内側に初期化
+                    while True:
+                        position = np.random.uniform(0, self.box_size, 3)
+                        distance_from_center = np.sqrt(
+                            (position[0] - center_x)**2 +
+                            (position[1] - center_y)**2 +
+                            (position[2] - center_z)**2
+                        )
+                        if distance_from_center <= radius:
+                            break
                 else:
                     position = np.random.uniform(0, self.box_size, 3)
 

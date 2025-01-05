@@ -3,8 +3,8 @@ from visualization import Visualization
 
 # 使用例
 def run_simulation():
-    # 膜でシミュレーションを初期化
-    membrane_bounds = (4.0, 6.0)  # z=4とz=6の間の膜
+    # 球状の膜でシミュレーションを初期化
+    membrane_bounds = (5.0, 5.0, 5.0, 3.0)  # 中心(5, 5, 5), 半径3の球状膜
     sim = ReactionLoop3D(box_size=10.0, membrane_bounds=membrane_bounds)
 
     # シミュレーションを実行

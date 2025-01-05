@@ -32,16 +32,22 @@ class Molecule:
 
         Args:
             dt (float): タイムステップ
-            membrane_bounds (tuple): 膜境界のオプション (min_z, max_z)
+            membrane_bounds (tuple): 球状膜の中心と半径 (center_x, center_y, center_z, radius)
         """
         random_displacement = np.random.normal(0, np.sqrt(2*self.diffusion_coefficient*dt), 3)
         new_position = self.position + random_displacement
 
         # 指定されている場合は膜の制約を適用
         if membrane_bounds and self.species_type.startswith('A'):
-            min_z, max_z = membrane_bounds
-            if new_position[2] < min_z or new_position[2] > max_z:
-                new_position[2] = self.position[2]  # 膜から跳ね返る
+            center_x, center_y, center_z, radius = membrane_bounds
+            distance_from_center = np.sqrt(
+                (new_position[0] - center_x)**2 +
+                (new_position[1] - center_y)**2 +
+                (new_position[2] - center_z)**2
+            )
+            if distance_from_center > radius:
+                # 球の外に出た場合、内側に反射させる。膜から微小量しかはみ出ない想定の下、近似的な処理をしている
+                new_position = self.position + (radius / distance_from_center) * (new_position - self.position)
 
         self.position = new_position
 
